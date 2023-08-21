@@ -28,23 +28,76 @@ bool Roster::addStudent(Student* student)
 
 Student* Roster::selectStudent()
 {
+    // New method: create a sequence just for this execution, then use it over and over
+    // 8/21/2023
+    if (!callOnSequence) {
+        //std::cerr << "Creating call on sequence: " << roster.size() << "\n";
+        int maxCalls = 0, totalCalls = 0, ccount;
+        for (auto student : roster) {
+            ccount = student->calls();
+            if (ccount > maxCalls)
+                maxCalls = ccount;
+            totalCalls += ccount;
+        }
+        maxCalls++; // so that max can be selected too
+        callOnSequence = new int[roster.size()+1];
+        for (unsigned int i = 0; i < roster.size(); i++) {
+            int r;
+            do {
+                //r = (*randomGen)() % roster.size();
+                //for (int j = 0; j < i; j++) {
+                //    if (r == callOnSequence[j])
+                //        r = -1;
+                //}
+                int randomRange = (maxCalls * roster.size()) - totalCalls;
+                int selValue = (*randomGen)() % (randomRange + 1);
+                //std::cerr << "randomRange: " << randomRange
+                //          << "  selValue: " << selValue << "\n";
+                r = 0;
+                for (auto student : roster) {
+                    if (selValue <= (maxCalls - student->calls()))
+                        break;
+                    selValue -= maxCalls - student->calls();
+                    r++;
+                }
+                if (r >= (int) roster.size())
+                    r = roster.size() - 1;
+                //std::cerr << "Selected r: " << r << "\n";
+                for (unsigned int j = 0; j < i; j++) {
+                    if (r == callOnSequence[j])
+                        r = -1;
+                }
+            } while (r < 0);
+            //std::cerr << "Adding index " << r << " in position " << i << "\n";
+            callOnSequence[i] = r;
+        }
+        callIndex = 0;
+    }
+    if (callIndex >= roster.size())
+        callIndex = 0;
+    //std::cerr << "Returning selection at " << callIndex << ": "
+    //          << callOnSequence[callIndex] << "\n";
+    return roster[callOnSequence[callIndex++]];
+    // ---- NOT USED BELOW HERE ---------
     //int selValue = (*randomGen)() % roster.size();
     //return roster[selValue];
     // TODO: add weighting to help balance out selections
     // If a student has been selected too often, reduce them
     // int selValue = ((*randomGen)() % totalCalls) + 1;
     // - this is possibly done 4/18/2023
-    int maxCalls = 0, totalCalls = 0, ccount; 
+    int maxCalls = 0, totalCalls = 0, ccount;
     for (auto student : roster) {
         ccount = student->calls();
         if (ccount > maxCalls)
             maxCalls = ccount;
         totalCalls += ccount;
     }
-    //std::cerr << "totalCalls: " << totalCalls << "  maxCalls: " << maxCalls << "\n";
+    std::cerr << "totalCalls: " << totalCalls << "  maxCalls: " << maxCalls
+              << "\n";
     int randomRange = (maxCalls * roster.size()) - totalCalls;
     int selValue = (*randomGen)() % randomRange + 1;
-    //std::cerr << "randomRange: " << randomRange << "  selValue: " << selValue << "\n";
+    std::cerr << "randomRange: " << randomRange << "  selValue: " << selValue
+              << "\n";
     for (auto student : roster) {
         if (selValue <= (maxCalls - student->calls()))
             return student;

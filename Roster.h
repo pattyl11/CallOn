@@ -22,6 +22,8 @@ private:
     std::vector<Student*> roster;
     int count;
     int totalCalls;
+    int* callOnSequence=0;
+    unsigned int callIndex=0;
     std::string dataFilename;
     std::mt19937* randomGen;
 };
