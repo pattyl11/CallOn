@@ -2,7 +2,6 @@
 #include "Roster.h"
 #include "callon.xpm"
 #include <FL/Fl_Pixmap.H>
-#include <FL/Fl_RGB_Image.H>
 
 bool CallOnApp::rateStudent(int rating)
 {
